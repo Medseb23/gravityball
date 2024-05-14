@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravity Ball</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const ball = {
+            img: new Image(),
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 25,
+            vx: 0,
+            vy: 0,
+            ax: 0,
+            ay: 0
+        };
+
+        ball.img.src = 'bola.png';
+
+        window.addEventListener('deviceorientation', (event) => {
+            ball.ax = event.gamma / 90; // Inclination left-right (tilt)
+            ball.ay = event.beta / 90; // Inclination front-back (tilt)
+        });
+
+        function updateBall() {
+            // Update velocity with acceleration
+            ball.vx += ball.ax;
+            ball.vy += ball.ay;
+
+            // Apply friction
+            ball.vx *= 0.99;
+            ball.vy *= 0.99;
+
+            // Update position with velocity
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // Boundary collision detection
+            if (ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width - ball.radius;
+                ball.vx *= -0.8;
+            } else if (ball.x - ball.radius < 0) {
+                ball.x = ball.radius;
+                ball.vx *= -0.8;
+            }
+
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.vy *= -0.8;
+            } else if (ball.y - ball.radius < 0) {
+                ball.y = ball.radius;
+                ball.vy *= -0.8;
+            }
+        }
+
+        function drawBall() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(ball.img, ball.x - ball.radius, ball.y - ball.radius, ball.radius * 2, ball.radius * 2);
+        }
+
+        function gameLoop() {
+            updateBall();
+            drawBall();
+            requestAnimationFrame(gameLoop);
+        }
+
+        ball.img.onload = function() {
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
