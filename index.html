@@ -8,6 +8,11 @@
         body {
             margin: 0;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
         canvas {
             display: block;
@@ -36,10 +41,24 @@
 
         ball.img.src = 'bola.png';
 
-        window.addEventListener('deviceorientation', (event) => {
+        function requestPermission() {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
+        function handleOrientation(event) {
             ball.ax = event.gamma / 90; // Inclination left-right (tilt)
             ball.ay = event.beta / 90; // Inclination front-back (tilt)
-        });
+        }
 
         function updateBall() {
             // Update velocity with acceleration
@@ -85,6 +104,11 @@
 
         ball.img.onload = function() {
             gameLoop();
+        };
+
+        // Request permission on page load
+        window.onload = function() {
+            requestPermission();
         };
     </script>
 </body>
